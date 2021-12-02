@@ -1,5 +1,6 @@
 class InfoMessage:
     """Информационное сообщение о тренировке."""
+    print("hello world!")
     pass
 
 
