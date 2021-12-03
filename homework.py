@@ -14,10 +14,12 @@ class InfoMessage:
         self.speed = speed
         self.calories = calories
 
-    def сreate_message(self) -> str:
-        return(f"Тип тренировки: {self.training_type}; Длительность: {self.duration} ч.;"
-               f" Дистанция: {self.distance} км; Ср. скорость: {self.speed}"
-               f" км/ч; Потрачено ккал: {self.calories}.")
+    def get_message(self) -> str:
+        return(f"Тип тренировки: {self.training_type}; "
+               f"Длительность: {self.duration} ч.; "
+               f"Дистанция: {self.distance} км; "
+               f"Ср. скорость: {self.speed} км/ч; "
+               f"Потрачено ккал: {self.calories}.")
 
 
 class Training:
@@ -53,7 +55,7 @@ class Training:
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
         #training_object = (self.training_type, self.duration, self.get_distance(), self.get_mean_speed(), self.get_spent_calories())
-        info = InfoMessage(self.training_type, self.duration, self.get_distance(), self.get_mean_speed(), self.get_spent_calories())
+        info = InfoMessage(self.__class__.__name__, self.duration, self.get_distance(), self.get_mean_speed(), self.get_spent_calories())
         return info
         
 
@@ -91,14 +93,14 @@ class SportsWalking(Training):
         coeff_calorie_4 = 0.029
         time_in_minutes = self.duration * 60
         coeff_result_1 = (coeff_calorie_3 * self.weight)
-        coeff_result_2 = (self.get_mean_speed()**2 // self.height) * coeff_calorie_4
-        spent_calories = coeff_result_1 + (coeff_result_2 * self.weight) * time_in_minutes
+        coeff_result_2 = (self.get_mean_speed()**2 // self.height) * coeff_calorie_4 * self.weight
+        spent_calories = (coeff_result_1 + coeff_result_2) * time_in_minutes
         return spent_calories
 
 
 class Swimming(Training):
     """Тренировка: плавание."""
-    LEN_STEP: float = 1.35
+    LEN_STEP: float = 1.38
     training_type: str = "Тренировка по плаванию"
 
     def __init__(self,
@@ -138,10 +140,10 @@ def read_package(workout_type: str, data: list) -> Training:
     return training
 
 
-def main(training: Training) -> str:
+def main(training: Training) -> None:
     """Главная функция."""
     info = training.show_training_info()
-    print(info.сreate_message())
+    print(info.get_message())
 
 
 if __name__ == '__main__':
