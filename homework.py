@@ -112,10 +112,10 @@ class Swimming(Training):
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
     train_dict: dict = {
-            "SWM": Swimming,
-            "RUN": Running,
-            "WLK": SportsWalking,
-        }
+        "SWM": Swimming,
+        "RUN": Running,
+        "WLK": SportsWalking,
+    }
     training: Training = train_dict[workout_type](*data)
     return training
 
