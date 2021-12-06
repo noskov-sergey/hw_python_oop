@@ -32,36 +32,36 @@ class Training:
     COEFF_RUN_2: ClassVar[int] = 20
     COEFF_WALK: ClassVar[float] = 0.035
     COEFF_WALK_2: ClassVar[float] = 0.029
-    COEFFF_SWIMING: ClassVar[float] = 1.1
-    COEFFF_SWIMING_2: ClassVar[int] = 2
+    COEFF_SWIMING: ClassVar[float] = 1.1
+    COEFF_SWIMING_2: ClassVar[int] = 2
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
-        distance = self.action * self.LEN_STEP / self.M_IN_KM
-        return distance
+        return self.action * self.LEN_STEP / self.M_IN_KM
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения."""
         full_distance = self.get_distance()
-        mean_speed = full_distance / self.duration
-        return mean_speed
+        return full_distance / self.duration
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        raise NotImplementedError("В Методе сабкласса должна быть прописана реализация")
+        raise NotImplementedError(
+            "В Методе сабкласса должна быть прописана реализация"
+        )
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
-        info = InfoMessage(
+        return InfoMessage(
             type(self).__name__,
             self.duration,
             self.get_distance(),
             self.get_mean_speed(),
             self.get_spent_calories(),
         )
-        return info
 
 
+@dataclass
 class Running(Training):
     """Тренировка: бег."""
 
@@ -70,8 +70,7 @@ class Running(Training):
         time_in_min = self.duration * self.HOUR_IN_MIN
         mean_speed = self.get_mean_speed()
         part_of_formula = self.COEFF_RUN * mean_speed - self.COEFF_RUN_2
-        spent_cal = part_of_formula * self.weight / self.M_IN_KM * time_in_min
-        return spent_cal
+        return part_of_formula * self.weight / self.M_IN_KM * time_in_min
 
 
 @dataclass
@@ -83,10 +82,9 @@ class SportsWalking(Training):
         """Получить количество затраченных калорий при хотьбе."""
         time_in_minutes = self.duration * self.HOUR_IN_MIN
         part_of_formula = self.COEFF_WALK * self.weight
-        part_of_formula_2 = self.get_mean_speed() ** 2 // self.height
+        part_of_formula_2 = self.get_mean_speed()**2 // self.height
         part_of_formula_3 = part_of_formula_2 * self.COEFF_WALK_2 * self.weight
-        spent_cal = (part_of_formula + part_of_formula_3) * time_in_minutes
-        return spent_cal
+        return (part_of_formula + part_of_formula_3) * time_in_minutes
 
 
 @dataclass
@@ -98,15 +96,13 @@ class Swimming(Training):
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий при плавании."""
-        part_of_formula = self.get_mean_speed() + self.COEFFF_SWIMING
-        spent_calories = part_of_formula * self.COEFFF_SWIMING_2 * self.weight
-        return spent_calories
+        part_of_formula = self.get_mean_speed() + self.COEFF_SWIMING
+        return part_of_formula * self.COEFF_SWIMING_2 * self.weight
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость при плавании в бассейне."""
         all_dist_pool = self.length_pool * self.count_pool
-        mean_speed = all_dist_pool / self.M_IN_KM / self.duration
-        return mean_speed
+        return all_dist_pool / self.M_IN_KM / self.duration
 
 
 def read_package(workout_type: str, data: list) -> Training:
@@ -116,8 +112,17 @@ def read_package(workout_type: str, data: list) -> Training:
         "RUN": Running,
         "WLK": SportsWalking,
     }
-    training: Training = train_dict[workout_type](*data)
-    return training
+    if workout_type not in train_dict:
+        # На самом деле не до конца понял этот модуль
+        # Да, сейчас выкидываю сообщение c типом, но все равно код падает.
+        # Нужно ли делать что-то еще?
+        raise KeyError(
+            "вызывающая сторона передала workout_type, "
+            "которого в нашем словаре нет - " + workout_type
+            + ". Проверьте данные на ввод, пожалуйста"
+        )
+    else:
+        return train_dict[workout_type](*data)
 
 
 def main(training: Training) -> None:
@@ -132,7 +137,6 @@ if __name__ == "__main__":
         ("RUN", [15000, 1, 75]),
         ("WLK", [9000, 1, 75, 180]),
     ]
-
     for workout_type, data in packages:
         training = read_package(workout_type, data)
         main(training)
