@@ -10,13 +10,16 @@ class InfoMessage:
     distance: float
     speed: float
     calories: float
+    RESULT_STRING: ClassVar[str] = (
+            'Тип тренировки: {}; '
+            'Длительность: {:.3f} ч.; '
+            'Дистанция: {:.3f} км; '
+            'Ср. скорость: {:.3f} км/ч; '
+            'Потрачено ккал: {:.3f}.')
 
     def get_message(self) -> str:
-        return (f"Тип тренировки: {self.training_type}; "
-                f"Длительность: {self.duration:.3f} ч.; "
-                f"Дистанция: {self.distance:.3f} км; "
-                f"Ср. скорость: {self.speed:.3f} км/ч; "
-                f"Потрачено ккал: {self.calories:.3f}.")
+        return self.RESULT_STRING.format(self.training_type,
+            self.duration, self.distance, self.speed, self.calories)
 
 
 @dataclass
@@ -47,7 +50,8 @@ class Training:
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
         raise NotImplementedError(
-            "В Методе сабкласса должна быть прописана реализация"
+            'В методе сабкласса' + type(self).__name__
+            + ' должна быть прописана реализация'
         )
 
     def show_training_info(self) -> InfoMessage:
@@ -113,9 +117,6 @@ def read_package(workout_type: str, data: list) -> Training:
         "WLK": SportsWalking,
     }
     if workout_type not in train_dict:
-        # На самом деле не до конца понял этот модуль
-        # Да, сейчас выкидываю сообщение c типом, но все равно код падает.
-        # Нужно ли делать что-то еще?
         raise KeyError(
             "вызывающая сторона передала workout_type, "
             "которого в нашем словаре нет - " + workout_type
