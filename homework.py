@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import ClassVar, Dict, List, Tuple, Union, Callable
 
 
 @dataclass
@@ -15,7 +15,8 @@ class InfoMessage:
             'Длительность: {:.3f} ч.; '
             'Дистанция: {:.3f} км; '
             'Ср. скорость: {:.3f} км/ч; '
-            'Потрачено ккал: {:.3f}.')
+            'Потрачено ккал: {:.3f}.'
+        )
 
     def get_message(self) -> str:
         return self.RESULT_STRING.format(self.training_type,
@@ -31,12 +32,7 @@ class Training:
     LEN_STEP: ClassVar[float] = 0.65
     M_IN_KM: ClassVar[int] = 1000
     HOUR_IN_MIN: ClassVar[int] = 60
-    COEFF_RUN: ClassVar[int] = 18
-    COEFF_RUN_2: ClassVar[int] = 20
-    COEFF_WALK: ClassVar[float] = 0.035
-    COEFF_WALK_2: ClassVar[float] = 0.029
-    COEFF_SWIMING: ClassVar[float] = 1.1
-    COEFF_SWIMING_2: ClassVar[int] = 2
+
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -68,6 +64,8 @@ class Training:
 @dataclass
 class Running(Training):
     """Тренировка: бег."""
+    COEFF_RUN: ClassVar[int] = 18
+    COEFF_RUN_2: ClassVar[int] = 20
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий при беге."""
@@ -81,6 +79,8 @@ class Running(Training):
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
     height: float
+    COEFF_WALK: ClassVar[float] = 0.035
+    COEFF_WALK_2: ClassVar[float] = 0.029
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий при хотьбе."""
@@ -97,6 +97,8 @@ class Swimming(Training):
     length_pool: float = 1
     count_pool: int = 1
     LEN_STEP: ClassVar[float] = 1.38
+    COEFF_SWIMING: ClassVar[float] = 1.1
+    COEFF_SWIMING_2: ClassVar[int] = 2
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий при плавании."""
@@ -109,9 +111,9 @@ class Swimming(Training):
         return all_dist_pool / self.M_IN_KM / self.duration
 
 
-def read_package(workout_type: str, data: list) -> Training:
+def read_package(workout_type: str, data: List[int]) -> Training:
     """Прочитать данные полученные от датчиков."""
-    train_dict: dict = {
+    train_dict: Dict[str, str] = {
         "SWM": Swimming,
         "RUN": Running,
         "WLK": SportsWalking,
@@ -126,14 +128,14 @@ def read_package(workout_type: str, data: list) -> Training:
         return train_dict[workout_type](*data)
 
 
-def main(training: Training) -> None:
+def main(training: Callable[[str], Training]) -> None:
     """Главная функция."""
     info = training.show_training_info()
     print(info.get_message())
 
 
 if __name__ == "__main__":
-    packages = [
+    packages: List[Tuple[Union[str, int]]] = [
         ("SWM", [720, 1, 80, 25, 40]),
         ("RUN", [15000, 1, 75]),
         ("WLK", [9000, 1, 75, 180]),
